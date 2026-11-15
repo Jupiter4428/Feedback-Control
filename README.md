@@ -167,6 +167,57 @@ python lab3_p_control/p_controller.py
    - เชื่อมต่ออุปกรณ์ด้วย Access Token ตามการตั้งค่าใน `mqtt_thingsboard/tank_mqtt_service.py`
    - ตรวจสอบค่า Telemetry บน Dashboard แบบเรียลไทม์
 
+#### ตัวเลือกที่ C: รัน Interactive Demo บน ThingsBoard Cloud (แนะนำสำหรับนำเสนอ)
+ใช้สคริปต์ `demo_thingsboard.py` เพื่อสลับโหมดการควบคุมทั้ง 4 แลปแบบเรียลไทม์ผ่าน CLI โดยไม่ต้องตั้งค่า Node-RED:
+1. **รันสคริปต์**:
+   ```bash
+   python demo_thingsboard.py
+   ```
+   (ระบบจะเชื่อมต่อ ThingsBoard Cloud และรอรับคำสั่งโดยยังไม่เริ่มจำลองจนกว่าจะเลือกเมนู)
+2. **เลือก Scenario ที่ต้องการทดสอบจากเมนู**:
+   - `[1]` **Lab 1: Open Loop** — เปิดวาล์ว 100% ตามเวลาที่คำนวณไว้เพื่อเติมน้ำจากระดับปัจจุบันไปที่ `60.0` แล้วตัดวาล์ว
+   - `[2]` **Lab 2: ON/OFF Control** — ควบคุมระดับน้ำที่ `50.0` พร้อมน้ำไหลออก `0.15 m^3/s` (เห็นการแกว่ง +-10%)
+   - `[3]` **Lab 3: P Control** — ควบคุมระดับน้ำที่ `50.0` พร้อมน้ำไหลออก `0.20 m^3/s` (เห็น Steady-State Error)
+   - `[4]` **Lab 4: PI Control** — ควบคุมระดับน้ำที่ `50.0` พร้อมน้ำไหลออก `0.20 m^3/s` (พจน์ Integral ดันน้ำจนแตะ `50.0`)
+   - `[c]` **Clear** — หยุดการจำลองและรีเซ็ตระดับน้ำกลับไปที่ `10.0`
+   - `[q]` **Exit** — ออกจากโปรแกรม
+
+### 4. การทดสอบระบบ (Testing)
+- **ตรวจสอบ Syntax ของสคริปต์**:
+  ```bash
+  python -m py_compile demo_thingsboard.py
+  ```
+- **ทดสอบการทำงานแต่ละ Lab แยกส่วน**:
+  ```bash
+  python lab1_open_loop/open_loop_controller.py
+  python lab2_on_off/on_off_controller.py
+  python lab3_p_control/p_controller.py
+  python lab4_pi_control/pi_controller.py
+  ```
+
+### 5. การตั้งค่า ThingsBoard Cloud สำหรับใช้งานเอง
+1. **สร้างบัญชีและเข้าสู่ระบบ**: ไปที่ [thingsboard.cloud](https://thingsboard.cloud) แล้วสร้างบัญชีหรือเข้าสู่ระบบ
+2. **สร้าง Device และคัดลอก Access Token**:
+   - ไปที่เมนู **Entities** $\rightarrow$ **Devices** $\rightarrow$ กด **+** (Add new device)
+   - ตั้งชื่อ Device (เช่น `Water Tank Simulator`) แล้วกด **Add**
+   - เปิด Device ที่สร้างขึ้น $\rightarrow$ กด **Copy access token**
+3. **กำหนดค่า Token ให้กับสคริปต์**:
+   - ตั้งค่า Environment Variable ก่อนรัน (แนะนำ):
+     ```powershell
+     $env:THINGSBOARD_TOKEN="YOUR_ACCESS_TOKEN"
+     python demo_thingsboard.py
+     ```
+   - หรือแก้ไขค่า `THINGSBOARD_TOKEN` โดยตรงใน `demo_thingsboard.py` (และ `mqtt_thingsboard/tank_mqtt_service.py` หากใช้งาน)
+4. **สร้าง Dashboard แสดงผล**:
+   - ไปที่เมนู **Dashboards** $\rightarrow$ กด **+** สร้าง Dashboard ใหม่
+   - เพิ่ม Widget (เช่น Gauge, Value Card, Time-series Chart) แล้วเลือก Datasource เป็น Device ที่สร้างไว้
+   - ผูก Telemetry Keys ที่ระบบส่งขึ้นไป ได้แก่:
+     - `water_sensor_depth` (ระดับน้ำปัจจุบัน)
+     - `target_level` (ระดับน้ำเป้าหมาย)
+     - `valve_position` (เปอร์เซ็นต์การเปิดวาล์ว)
+     - `water_sensor_limit_switch` (สถานะ Limit Switch `0` หรือ `1`)
+     - `operating_mode` (ชื่อโหมดที่กำลังทำงาน)
+
 ---
 
 ## MQTT Telemetry & Topics

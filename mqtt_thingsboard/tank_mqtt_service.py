@@ -19,9 +19,9 @@ from lab2_on_off.on_off_controller import OnOffController
 from lab3_p_control.p_controller import PController
 from lab4_pi_control.pi_controller import PIController
 
-MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
+MQTT_BROKER = os.getenv("MQTT_BROKER", "thingsboard.cloud")
 MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
-THINGSBOARD_TOKEN = os.getenv("THINGSBOARD_TOKEN", "tank_device_token")
+THINGSBOARD_TOKEN = os.getenv("THINGSBOARD_TOKEN", "Gv7jGS7fQLKUFREjxgTf")
 
 # Topics
 TOPIC_TELEMETRY = "v1/devices/me/telemetry"             # ThingsBoard standard telemetry
@@ -41,6 +41,8 @@ class TankMQTTService:
         self.pi_ctrl = PIController(kp=0.05, ki=0.01, target_level=self.target)
 
         self.client = mqtt.Client(client_id="tank_simulator")
+        if THINGSBOARD_TOKEN:
+            self.client.username_pw_set(THINGSBOARD_TOKEN)
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
 

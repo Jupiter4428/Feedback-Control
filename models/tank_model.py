@@ -32,6 +32,10 @@ class WaterTankSimulation:
         """Set water outflow rate (m^3/s)"""
         self.outflow_rate = max(0.0, outflow)
 
+    def set_level(self, level):
+        """Set water level directly (useful for resetting scenarios)"""
+        self.level = max(0.0, min(self.max_level, float(level)))
+
     def step(self, dt=0.1):
         """
         Simulate dynamic step over dt seconds:
