@@ -2,7 +2,7 @@
     {
         "id": "tab_feedback_control",
         "type": "tab",
-        "label": "EI444/CN360 Feedback Control",
+        "label": "CN360 Feedback Control",
         "disabled": false,
         "info": "Node-RED flow implementing Lab 1-4 for Water Tank Control"
     },
