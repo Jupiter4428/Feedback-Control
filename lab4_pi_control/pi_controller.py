@@ -31,10 +31,18 @@ class PIController:
         I_term = Ki * sum(Error * dt)
         """
         error = self.target_level - current_level
-        self.integral += error * dt
         
-        # Anti-windup clamp for integral term
-        self.integral = max(-100.0, min(100.0, self.integral))
+        # Anti-windup (Clamping / Conditional Integration):
+        # 1. ป้องกันไม่ให้สะสมเพิ่มเมื่อวาล์วเปิดเต็ม 100% แล้ว Error ยังเป็นบวก
+        # 2. ป้องกันไม่ให้สะสมลดเมื่อวาล์วปิดสนิท 0% แล้ว Error ยังเป็นลบ
+        # หรือถ้าสะสม จะสะสมเฉพาะเมื่อ Output ไม่อิ่มตัว (Unsaturated)
+        uncap_output = (self.kp * error) + (self.ki * self.integral)
+        is_saturated_high = uncap_output >= 1.0 and error > 0
+        is_saturated_low = uncap_output <= 0.0 and error < 0
+        
+        if not (is_saturated_high or is_saturated_low):
+            self.integral += error * dt
+            self.integral = max(-30.0, min(30.0, self.integral))
 
         output = (self.kp * error) + (self.ki * self.integral)
         valve_pos = max(0.0, min(1.0, output))
